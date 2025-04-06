@@ -24,7 +24,7 @@
         "Word error rate/Speed": "5.69 (librispeech test-clean) 6.05 (tedlium) 29.78(callcenter)",
         "Notes": "Accurate generic US English model",
         "License": "Apache 2.0",
-        "Downloaded": true
+        "Downloaded": false
     },
     {
         "Model": "vosk-model-en-us-0.22-lgraph",
@@ -69,7 +69,7 @@
         "Word error rate/Speed": "8.20 (librispeech test-clean) 9.28 (tedlium)",
         "Notes": "Wideband model for dictation from Kaldi-active-grammar project with configurable graph",
         "License": "AGPL",
-        "Downloaded": false
+        "Downloaded": true
     },
     {
         "Model": "vosk-model-en-us-librispeech-0.2",
@@ -87,7 +87,7 @@
         "Word error rate/Speed": "11.55 (librispeech test-clean) 12.64 (tedlium)",
         "Notes": "Repackaged Zamia model f_250, mainly for research",
         "License": "LGPL-3.0",
-        "Downloaded": false
+        "Downloaded": true
     },
     {
         "Model": "vosk-model-en-us-aspire-0.2",
@@ -132,7 +132,7 @@
         "Word error rate/Speed": "49.05 (NPTEL Pure)",
         "Notes": "Lightweight Indian English model for mobile applications",
         "License": "Apache 2.0",
-        "Downloaded": false
+        "Downloaded": true
     },
     {
         "Model": "Chinese",
@@ -150,7 +150,7 @@
         "Word error rate/Speed": "23.54 (SpeechIO-02) 38.29 (SpeechIO-06) 17.15 (THCHS)",
         "Notes": "Lightweight model for Android and RPi",
         "License": "Apache 2.0",
-        "Downloaded": false
+        "Downloaded": true
     },
     {
         "Model": "vosk-model-cn-0.22",
@@ -555,7 +555,7 @@
         "Word error rate/Speed": "16.40 (MGB-2 dev set)",
         "Notes": "Repackaged Arabic model trained on MGB2 dataset from Kaldi",
         "License": "Apache 2.0",
-        "Downloaded": false
+        "Downloaded": true
     },
     {
         "Model": "vosk-model-ar-0.22-linto-1.1.0",
@@ -564,7 +564,7 @@
         "Word error rate/Speed": "52.87 (cv test) 28.50 (MBG-2 dev set) 1.0xRT",
         "Notes": "Big model from LINTO project",
         "License": "AGPL",
-        "Downloaded": false
+        "Downloaded": true
     },
     {
         "Model": "Farsi",

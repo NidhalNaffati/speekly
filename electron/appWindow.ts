@@ -14,7 +14,7 @@ const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 
 export function createWindow(): BrowserWindow {
   window = new BrowserWindow({
-    width: 900,
+    width: 1200,
     height: 900,
     alwaysOnTop: true,
     title: "smart-teleprompter",
@@ -44,6 +44,8 @@ export function createWindow(): BrowserWindow {
 
   // initialize IPC handlers for model download
   registerModelDownloadIPC();
+
+
 
   return window;
 }

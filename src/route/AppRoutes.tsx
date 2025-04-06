@@ -5,7 +5,7 @@ import Transcription from "../pages/Transcription.tsx";
 import Models from "../pages/Models.tsx";
 import Live from "../pages/LiveSpeak.tsx"
 
-function App() {
+function AppRoutes() {
   return (
     <>
       <Routes>
@@ -19,4 +19,4 @@ function App() {
   );
 }
 
-export default App;
+export default AppRoutes;

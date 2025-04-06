@@ -1,54 +1,161 @@
+import {useState, useEffect} from 'react';
+import {ThemeToggle} from '@/components/ThemeToggle';
+import {Button} from '@/components/ui/button';
+import {Menu, X} from 'lucide-react';
 import {Link} from 'react-router-dom';
 
+// Define the types for NavItem props
 interface NavItemProps {
   to: string;
   label: string;
+  onClick?: () => void;
 }
+
+// NavItem component for consistent navigation links
+const NavItem = ({to, label, onClick}: NavItemProps) => (
+  <Link
+    to={to}
+    className="px-3 py-2 rounded-md text-sm font-medium hover:text-primary transition-colors"
+    onClick={onClick}
+  >
+    {label}
+  </Link>
+);
 
 export function Navbar() {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <nav className="border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 shadow-lg">
-      <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-        <Link to="/" className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
-          Home
-        </Link>
-        <button
-          data-collapse-toggle="navbar"
-          type="button"
-          className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-          aria-controls="navbar"
-          aria-expanded="false"
-        >
-          <span className="sr-only">Open main menu</span>
-          <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-               viewBox="0 0 17 14">
-            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                  d="M1 1h15M1 7h15M1 13h15"/>
-          </svg>
-        </button>
-        <div className="hidden w-full md:block md:w-auto" id="navbar">
-          <ul
-            className="flex flex-col font-medium mt-4 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-transparent dark:bg-gray-800 md:dark:bg-transparent dark:border-gray-700">
-            <NavItem to="/settings" label="Settings"/>
-            <NavItem to="/models" label="Models"/>
-            <NavItem to="/transcription" label="Transcription"/>
-            <NavItem to="/live" label="Live"/>
-          </ul>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      isScrolled
+        ? 'bg-background/80 backdrop-blur-md shadow-sm'
+        : 'bg-transparent'
+    }`}>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between">
+          {/* Logo */}
+          <div className="flex-shrink-0">
+            <a href="/" className="flex items-center">
+              <span className="text-2xl font-bold gradient-text">Speekly</span>
+            </a>
+          </div>
+
+          {/* Navigation - Desktop */}
+          <div className="hidden md:block">
+            <div className="flex items-center space-x-4">
+              <a href="#features"
+                 className="px-3 py-2 rounded-md text-sm font-medium hover:text-primary transition-colors">
+                Features
+              </a>
+              <a href="#demo"
+                 className="px-3 py-2 rounded-md text-sm font-medium hover:text-primary transition-colors">
+                Demo
+              </a>
+              <a href="#download"
+                 className="px-3 py-2 rounded-md text-sm font-medium hover:text-primary transition-colors">
+                Download
+              </a>
+
+              {/* New NavItems */}
+              <NavItem to="/settings" label="Settings"/>
+              <NavItem to="/models" label="Models"/>
+              <NavItem to="/transcription" label="Transcription"/>
+              <NavItem to="/live" label="Live"/>
+              <ThemeToggle/>
+              <Button className="speekly-gradient">
+                Get Started
+              </Button>
+            </div>
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="flex md:hidden">
+            <ThemeToggle/>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="ml-2"
+            >
+              {mobileMenuOpen ? (
+                <X className="h-6 w-6"/>
+              ) : (
+                <Menu className="h-6 w-6"/>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
-    </nav>
-  );
-}
 
-function NavItem({to, label}: NavItemProps) {
-  return (
-    <li>
-      <Link
-        to={to}
-        className="block py-2 px-3 rounded text-gray-800 hover:text-blue-500 dark:text-gray-200 dark:hover:text-blue-400 transition md:p-0 md:dark:text-blue-500"
-      >
-        {label}
-      </Link>
-    </li>
+      {/* Mobile menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-background/95 backdrop-blur-md">
+          <div className="px-2 pt-2 pb-3 space-y-1">
+            <a
+              href="#features"
+              className="block px-3 py-2 rounded-md text-base font-medium hover:text-primary"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Features
+            </a>
+            <a
+              href="#demo"
+              className="block px-3 py-2 rounded-md text-base font-medium hover:text-primary"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Demo
+            </a>
+            <a
+              href="#download"
+              className="block px-3 py-2 rounded-md text-base font-medium hover:text-primary"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Download
+            </a>
+
+            {/* New NavItems for mobile */}
+            <NavItem
+              to="/settings"
+              label="Settings"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <NavItem
+              to="/models"
+              label="Models"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <NavItem
+              to="/transcription"
+              label="Transcription"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <NavItem
+              to="/live"
+              label="Live"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+
+            <div className="pt-2">
+              <Button className="w-full speekly-gradient">
+                Get Started
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </nav>
   );
 }

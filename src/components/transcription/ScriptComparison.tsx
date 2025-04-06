@@ -1,5 +1,6 @@
 import React from "react";
-import {isWordSimilar} from "../../utils/word-similarity.ts";
+import {Card} from "@/components/ui/card";
+import {isWordSimilar} from "@/utils/word-similarity";
 
 interface ComparisonProps {
   currentParagraphIndex: number;
@@ -7,33 +8,35 @@ interface ComparisonProps {
   recognizedText: string;
 }
 
-const ScriptComparison: React.FC<ComparisonProps> = ({
-  currentParagraphIndex,
-  referenceParagraphs,
-  recognizedText,
-}) => {
-  const referenceParagraph = referenceParagraphs[currentParagraphIndex];
+const ScriptComparison: React.FC<ComparisonProps> = (
+    {
+      currentParagraphIndex,
+      referenceParagraphs,
+      recognizedText,
+    }) => {
+
+  const referenceParagraph = referenceParagraphs[currentParagraphIndex] || "";
   const referenceWords = referenceParagraph.split(" ");
   const recognizedWords = recognizedText.split(" ");
 
   return (
-    <div className="p-4 bg-white dark:bg-zinc-900 rounded-md shadow-md">
-      {referenceWords.map((referenceWord, i) => {
-        const userWord = recognizedWords[i];
-        const isWordSpelledCorrectly = isWordSimilar(userWord, referenceWord, 70);
+      <Card className="p-6 overflow-auto max-h-[400px]">
+        {referenceWords.map((referenceWord, i) => {
+          const userWord = recognizedWords[i];
+          const isWordCorrect = isWordSimilar(userWord, referenceWord, 70);
 
-        return (
-          <span
-            key={i}
-            className={`text-xl font-mono transition-colors ${
-              isWordSpelledCorrectly ? "text-green-500" : "text-red-500"
-            } ${i === recognizedWords.length - 1 ? "underline" : ""}`}
-          >
+          return (
+              <span
+                  key={i}
+                  className={`text-lg font-mono transition-colors ${
+                      isWordCorrect ? "text-primary" : "text-destructive"
+                  } ${i === recognizedWords.length - 1 ? "border-b-2" : ""}`}
+              >
             {referenceWord}{" "}
           </span>
-        );
-      })}
-    </div>
+          );
+        })}
+      </Card>
   );
 };
 

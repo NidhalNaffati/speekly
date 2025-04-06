@@ -1,106 +1,66 @@
 import {useState, useEffect} from 'react';
 import data from '../data/models-list.json';
-import {IpcRenderer} from "electron";
-import {ModelItem} from "../types/ModelItem.ts";
+import {ModelItem} from "../types/ModelItem";
+import {Languages} from 'lucide-react';
+import ModelsTable from '../components/ModelsTable';
+import {Navbar} from "@/components/Navbar.tsx";
 
-const ipcRenderer: IpcRenderer = window.ipcRenderer;
+interface LanguageGroup {
+  language: string;
+  models: ModelItem[];
+}
 
 const Models = () => {
-  const [, setDownloadProgress] = useState<number>(0);
-  const [downloadStatus, setDownloadStatus] = useState<string>('');
+  const [groupedModels, setGroupedModels] = useState<LanguageGroup[]>([]);
 
   useEffect(() => {
-    ipcRenderer.on('download-progress', (_event, progress: number) => {
-      setDownloadProgress(prevProgress => {
-        console.log('Download progress:', prevProgress); // Log the previous progress
-        // TODO: Notify the user about the download progress via Notification
-        return progress; // Return the updated progress
-      });
-    });
-
-    ipcRenderer.on('download-complete', (_event, downloadPath) => {
-      console.log('Download complete:', downloadPath);
-      alert('Download complete') // TODO: Notify the user about the download completion via Notification
-      setDownloadStatus(`Download complete: ${downloadPath}`);
-    });
-
-    ipcRenderer.on('download-error', (_event, errorMessage) => {
-      setDownloadStatus(`${errorMessage}`);
-      console.log(downloadStatus);
-      alert(`${errorMessage}`) // TODO: Notify the user about the download error via Notification
-    });
-
-    return () => {
-      ipcRenderer.removeAllListeners('download-progress');
-      ipcRenderer.removeAllListeners('download-complete');
-      ipcRenderer.removeAllListeners('download-error');
-
+    // Group models by language
+    const isLanguageHeader = (item: ModelItem): boolean => {
+      return item.Size === "" && item['Word error rate/Speed'] === "" && item.Notes === "" && item.License === "";
     };
-  }, [downloadStatus]);
 
-  const handleDownload = (modelUrl: string, modelName: string) => {
-    try {
-      ipcRenderer.send('download-model', modelUrl, modelName);
-    } catch (error) {
-      console.error('Error downloading or extracting model:', error);
-    }
-  };
+    const groups = data.reduce<LanguageGroup[]>((acc, item) => {
+      if (isLanguageHeader(item)) {
+        return [...acc, {language: item.Model, models: []}];
+      }
 
-  const handleDelete = (modelName: string) => {
-    try {
-      ipcRenderer.send('delete-model', modelName);
-    } catch (error) {
-      console.error('Error deleting model:', error);
-    }
-  };
+      const lastGroup = acc[acc.length - 1];
+      return [
+        ...acc.slice(0, -1),
+        {...lastGroup, models: [...lastGroup.models, item]}
+      ];
+    }, [{language: '', models: []}]).filter(group => group.language !== '');
 
-  const areWeRenderingTheModelLanguage = (item: ModelItem): boolean => {
-    return item.Size === "" && item['Word error rate/Speed'] === "" && item.Notes === "" && item.License === "";
-  };
+    setGroupedModels(groups);
+  }, []);
 
   return (
-    <div className="overflow-x-auto">
-      <table className="table-auto w-full">
-        <thead className="bg-gray-800 text-white">
-        <tr>
-          <th className="px-4 py-2">Model</th>
-          <th className="px-4 py-2">Size</th>
-          <th className="px-4 py-2">Word error rate/Speed</th>
-          <th className="px-4 py-2">Notes</th>
-          <th className="px-4 py-2">License</th>
-          <th className="px-4 py-2">Actions</th>
-        </tr>
-        </thead>
-        <tbody className="text-center">
-        {data.map((item, index) => (
-          <tr key={index}
-              className={areWeRenderingTheModelLanguage(item) ? "font-bold" : (index % 2 === 0 ? 'bg-gray-800' : 'bg-gray-600')}>
-            <td className="border px-4 py-2">{item.Model}</td>
-            <td className="border px-4 py-2">{item.Size}</td>
-            <td className="border px-4 py-2">{item['Word error rate/Speed']}</td>
-            <td className="border px-4 py-2">{item.Notes}</td>
-            <td className="border px-4 py-2">{item.License}</td>
-            <td className="border px-4 py-2">
-              {areWeRenderingTheModelLanguage(item) ? null :
-                item.Downloaded ?
-                  <button
-                    className="text-white font-bold py-2 px-4 rounded bg-red-500 hover:bg-red-700"
-                    onClick={() => handleDelete(item.Model)}>
-                    Delete
-                  </button>
-                  :
-                  <button
-                    className="text-white font-bold py-2 px-4 rounded bg-blue-500 hover:bg-blue-700"
-                    onClick={() => handleDownload(item.URL, item.Model)}>
-                    Download
-                  </button>
-              }
-            </td>
-          </tr>
-        ))}
-        </tbody>
-      </table>
-    </div>
+    <>
+      <Navbar />
+      <div className="container max-w-6xl mx-auto px-4 pt-20">
+        <div className="mb-8">
+          <div className="flex items-center space-x-3 mb-3">
+            <div className="p-2 rounded-full bg-primary/10">
+              <Languages className="w-5 h-5 text-primary"/>
+            </div>
+            <h1 className="text-3xl font-bold gradient-text">Transcription Models</h1>
+          </div>
+          <p className="text-muted-foreground">
+            Download language models to enable offline transcription capabilities
+          </p>
+        </div>
+
+        <div className="space-y-8">
+          {groupedModels.map((group, gIndex) => (
+            <ModelsTable
+              key={gIndex}
+              language={group.language}
+              models={group.models}
+            />
+          ))}
+        </div>
+      </div>
+    </>
   );
 };
 

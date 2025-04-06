@@ -3,10 +3,13 @@ import {app, BrowserWindow} from "electron";
 import fs from "fs";
 import https from "https";
 import AdmZip from "adm-zip";
-import {ModelItem} from "../../src/types/ModelItem.ts";
+import {ModelItem} from "@/types/ModelItem.ts";
 
 const MODELS_DIR_PATH = path.join(app.getAppPath(), 'models');
 const MODELS_LIST_PATH = path.join(app.getAppPath(), 'src', 'data', 'models-list.json');
+
+// Track active downloads to enable cancellation
+const activeDownloads = new Map();
 
 export function downloadModel(url: string, name: string) {
   const window = BrowserWindow.getFocusedWindow(); // Get the reference to the focused window
@@ -39,76 +42,136 @@ export function downloadModel(url: string, name: string) {
           file.write(chunk); // Writing the received data chunk to the file
 
           // Sending download progress to the renderer process
-          window?.webContents.send('download-progress', progress.toFixed(2));
+          window?.webContents.send('download-progress', name, progress.toFixed(2));
         });
 
         response.on("end", () => { // Handling end of response
           file.end(); // Closing the file stream
           console.log(`Download complete: ${downloadPath}`); // Logging download completion
-          window?.webContents.send('download-complete', "Download Complete from the main process"); // Sending a message to the renderer process indicating download completion
-          extractFiles(downloadPath, MODELS_DIR_PATH); // Extracting the downloaded zip file (assuming it's a zip file
-          updateModelDownloadStatus(name, true); // Updating the downloaded status of the model in the models list
+          // Clean up the active download reference
+          activeDownloads.delete(name);
+          // Extract and update model status
+          extractFiles(downloadPath, MODELS_DIR_PATH, name);
         });
 
       } else {
         file.close(); // Closing the file stream
         fs.unlinkSync(downloadPath); // Deleting the incomplete file
-        window?.webContents.send('download-error', 'Error During the download progress'); // Sending the error message to the renderer process
+        window?.webContents.send('download-error', name, `Error: HTTP ${response.statusCode}`); // Sending the error message to the renderer process
         console.error(`Error downloading file: Status Code ${response.statusCode}`); // Logging the error due to unsuccessful response status code
+        activeDownloads.delete(name);
       }
     });
 
+    // Store reference to the request for potential cancellation
+    activeDownloads.set(name, {request, file, downloadPath});
+
     request.on("error", err => { // Handling request error
-      // get teh error message type
+      // Handle the error message type
       if (err.message === 'getaddrinfo EAI_AGAIN alphacephei.com') {
-        window?.webContents.send('download-error', 'Make sure that you are connected to the internet'); // Sending the error message to the renderer process
+        window?.webContents.send('download-error', name, 'Make sure that you are connected to the internet'); // Sending the error message to the renderer process
         console.error(`Error downloading file: ${err.message}`); // Logging the error message
       } else {
-        fs.unlinkSync(downloadPath); // Deleting the file if there's an error during download
-        window?.webContents.send('download-error', 'Error During the download progress'); // Sending the error message to the renderer process
+        if (fs.existsSync(downloadPath)) {
+          fs.unlinkSync(downloadPath); // Deleting the file if there's an error during download
+        }
+        window?.webContents.send('download-error', name, 'Error during the download process'); // Sending the error message to the renderer process
         console.error(`Error downloading file: ${err.message}`); // Logging the error message
       }
+      activeDownloads.delete(name);
     });
   } catch (error) {
-    window?.webContents.send('download-error', 'Error During the download progress'); // Sending the error message to the renderer process
+    window?.webContents.send('download-error', name, 'Error initiating download'); // Sending the error message to the renderer process
     console.error(`Error downloading file: ${error}`); // Catching and logging any error occurred during the download process
+    activeDownloads.delete(name);
   }
 }
 
-function extractFiles(zipPath: string, extractDir: string) {
+export function cancelDownload(modelName: string) {
+  const download = activeDownloads.get(modelName);
+  if (download) {
+    const {request, file, downloadPath} = download;
+
+    // Abort the request
+    if (request && request.abort) {
+      request.abort();
+    }
+
+    // Close and delete the partial file
+    if (file) {
+      file.close();
+    }
+
+    if (fs.existsSync(downloadPath)) {
+      try {
+        fs.unlinkSync(downloadPath);
+      } catch (error) {
+        console.error(`Error deleting partial download: ${error}`);
+      }
+    }
+
+    // Remove from active downloads
+    activeDownloads.delete(modelName);
+
+    const window = BrowserWindow.getFocusedWindow();
+    if (window) {
+      window.webContents.send('download-cancelled', modelName);
+    }
+
+    console.log(`Download cancelled for model: ${modelName}`);
+  }
+}
+
+function extractFiles(zipPath: string, extractDir: string, modelName: string) {
   const window = BrowserWindow.getFocusedWindow(); // Get the reference to the focused window
 
   try {
     const zip = new AdmZip(zipPath); // Creating a new instance of AdmZip with the downloaded zip file
     zip.extractAllTo(extractDir, true); // Extracting the contents of the zip file to the provided directory
-    window?.webContents.send('download-complete', "Download Complete from the main process"); // Sending a message to the renderer process indicating download completion
+    updateModelDownloadStatus(modelName, true); // Updating the downloaded status
+    window?.webContents.send('download-complete', modelName); // Sending a message to the renderer process indicating download completion
     console.log(`Extracted files to: ${extractDir}`); // Logging the extraction completion
   } catch (error) {
-    window?.webContents.send('download-error', 'Error During the Extraction'); // Sending the error message to the renderer process
+    window?.webContents.send('download-error', modelName, 'Error during extraction'); // Sending the error message to the renderer process
     console.error(`Error extracting files: ${error}`); // Catching and logging any error occurred during the extraction process
   } finally {
-    fs.unlinkSync(zipPath); // Deleting the downloaded zip file after extraction
-    console.log(`Deleted zip file: ${zipPath}`); // Logging the deletion of the zip file
+    if (fs.existsSync(zipPath)) {
+      fs.unlinkSync(zipPath); // Deleting the downloaded zip file after extraction
+      console.log(`Deleted zip file: ${zipPath}`); // Logging the deletion of the zip file
+    }
   }
 }
 
 export function deleteModel(modelName: string): void {
+  const window = BrowserWindow.getFocusedWindow();
   try {
     if (fs.existsSync(MODELS_DIR_PATH)) { // Checking if the model directory exists
-      fs.rmSync(MODELS_DIR_PATH, {recursive: true}); // Deleting the model directory if it exists
-      console.log(`Model ${modelName} deleted successfully.`);
-      updateModelDownloadStatus(modelName, false); // updating the downloaded status
+      // Only delete specific model folder rather than entire models directory
+      const modelPath = path.join(MODELS_DIR_PATH, modelName);
+      if (fs.existsSync(modelPath)) {
+        fs.rmSync(modelPath, {recursive: true}); // Delete just this model's directory
+        console.log(`Model ${modelName} deleted successfully.`);
+        updateModelDownloadStatus(modelName, false); // updating the downloaded status
+        window?.webContents.send('delete-complete', modelName);
+      } else {
+        console.error(`Model ${modelName} not found.`);
+        window?.webContents.send('delete-error', modelName, 'Model not found');
+      }
     } else {
-      console.error(`Model ${modelName} not found.`);
-      updateModelDownloadStatus(modelName, false); // update the downloaded status even if the model is not found
+      console.error(`Models directory not found.`);
+      window?.webContents.send('delete-error', modelName, 'Models directory not found');
     }
   } catch (err) {
     console.error('Error deleting model:', err);
+    window?.webContents.send('delete-error', modelName, 'Error deleting model');
   }
 }
 
 export function listAvailableModels(): string[] {
   try {
+    if (!fs.existsSync(MODELS_DIR_PATH)) {
+      return [];
+    }
     const models = fs.readdirSync(MODELS_DIR_PATH); // Reading the contents of the models directory
     console.log('Available models:', models)
     return models;
@@ -131,7 +194,6 @@ function updateDownloadStatus(models: ModelItem[], modelName: string, status: bo
 }
 
 function updateModelDownloadStatus(modelName: string, status: boolean): void {
-
   fs.readFile(MODELS_LIST_PATH, 'utf8', (err, data) => {
     if (err) {
       console.error('Error reading file:', err);
