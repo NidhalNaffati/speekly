@@ -8,8 +8,10 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # the model that contains the trained model from downloaded from: https://alphacephei.com/vosk/models
-model
-models
+# To keep the 'models' folder but ignore its contents:
+models/*
+!models/
+
 node_modules
 dist
 dist-ssr
