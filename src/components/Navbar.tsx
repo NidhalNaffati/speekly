@@ -74,6 +74,11 @@ export function Navbar() {
               <NavItem to="/models" label="Models"/>
               <NavItem to="/transcription" label="Transcription"/>
               <NavItem to="/live" label="Live"/>
+
+              <Link to="/webspeech" className="px-3 py-2 rounded-md text-sm font-medium hover:text-primary transition-colors">
+                Web Speech
+              </Link>
+
               <ThemeToggle/>
               <Button className="speekly-gradient">
                 Get Started
@@ -140,6 +145,11 @@ export function Navbar() {
             <NavItem
               to="/transcription"
               label="Transcription"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <NavItem
+              to="/webspeech"
+              label="Web Speech"
               onClick={() => setMobileMenuOpen(false)}
             />
             <NavItem
