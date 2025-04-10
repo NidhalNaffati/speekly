@@ -1,10 +1,11 @@
-import { ChangeEvent, useState } from "react";
+import {ChangeEvent, useState} from "react";
 import ScriptComparison from "@/components/transcription/ScriptComparison";
 import Navigation from "@/components/transcription/Navigation";
 import useTextAnalyzerHooks from "@/hooks/useTextAnalyzerHooks";
 import VoskControl from "@/components/transcription/VoskControl";
-import { Button } from "@/components/ui/button";
-import { Navbar } from "@/components/Navbar.tsx";
+import {Button} from "@/components/ui/button";
+import {Navbar} from "@/components/Navbar.tsx";
+import ParagraphProgress from "@/components/ParagraphProgress.tsx";
 
 function Transcription() {
   const [referenceText, setReferenceText] = useState<string>("");
@@ -28,7 +29,7 @@ function Transcription() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      <Navbar/>
       <main className="flex-1 py-8 px-4 sm:px-6 lg:px-8 mx-auto max-w-7xl w-full pt-20">
         {!isReferenceTextReady ? (
           <div className="flex flex-col items-center justify-center space-y-6 max-w-3xl mx-auto">
@@ -53,7 +54,7 @@ function Transcription() {
             <div className="flex flex-col md:flex-row justify-between items-center gap-6">
               <h1 className="text-2xl font-bold">Script Comparison</h1>
               <div className="flex items-center gap-4">
-                <VoskControl />
+                <VoskControl/>
               </div>
             </div>
 
@@ -70,6 +71,12 @@ function Transcription() {
                 reset={handleResetClick}
                 isPreviousDisabled={isPreviousDisabled}
                 isNextDisabled={isNextDisabled}
+              />
+            </div>
+            <div className="bg-card rounded-xl shadow-sm p-6 space-y-6">
+              <ParagraphProgress
+                referenceParagraph={referenceParagraphs[currentParagraphIndex] || ""}
+                recognizedText={recognizedText}
               />
             </div>
           </div>
