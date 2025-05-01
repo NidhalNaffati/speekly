@@ -64,8 +64,8 @@ Those are the main technologies used in this project:
 
 ## Installation
 
-1. Make sure to have Node.js installed on your machine
-   You can install it using this link here [https://nodejs.org/en/download/](https://nodejs.org/en/download/)
+1. Make sure to have Node.js version 18.17.0 installed on your machine. <br>
+   You can install it using this link: [https://nodejs.org/dist/v18.17.0/](https://nodejs.org/dist/v18.17.0/)
 
 2. Clone the repo from github using the following command
    ```sh
