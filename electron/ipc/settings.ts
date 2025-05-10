@@ -1,6 +1,6 @@
 import {ipcMain} from "electron";
 import IpcMainInvokeEvent = Electron.IpcMainInvokeEvent;
-import {getDefaultSettings, getParameter, loadSettings, saveSettings, updateParameter} from "../app-settings.ts";
+import {getDefaultSettings, getParameter, loadSettings, saveSettings, updateParameter} from "../utils/app-settings.ts";
 
 // Define IPC channel names
 const IPC_CHANNELS = {

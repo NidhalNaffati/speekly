@@ -1,7 +1,7 @@
 import childProcess from "child_process";
 import {BrowserWindow} from "electron";
 import path from "node:path";
-import {getParameter} from "../../app-settings.ts";
+import {getParameter} from "../app-settings.ts";
 
 function startVoskProcess(win: BrowserWindow) {
   console.log("Starting Vosk process...");
