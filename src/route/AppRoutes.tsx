@@ -7,6 +7,7 @@ import Live from "../pages/LiveSpeak.tsx"
 import Index from "@/pages/Index.tsx";
 import WebSpeech from "@/pages/WebSpeech.tsx";
 import NotFound from "@/pages/NotFound.tsx";
+import TextEditorPage from "@/pages/TextEditor.tsx";
 
 function AppRoutes() {
     return (
@@ -20,6 +21,7 @@ function AppRoutes() {
                     <Route path="/transcription" element={<Transcription/>}/>
                     <Route path="/models" element={<Models/>}/>
                     <Route path="/live" element={<Live/>}/>
+                    <Route path="/text-editor" element={<TextEditorPage/>}/>
                     <Route path="*" element={<NotFound/>}/>
                 </Routes>
             </BrowserRouter>

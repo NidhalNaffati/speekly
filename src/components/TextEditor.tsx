@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {Button} from '@/components/ui/button';
-import {Copy, Download, FileText, Maximize, Minimize, Save, Trash2} from 'lucide-react';
+import {Copy, Download, FileText, Maximize, Minimize, Save, Trash2, ArrowLeft} from 'lucide-react';
 import {useToast} from '@/hooks/use-toast';
 import {Textarea} from '@/components/ui/textarea';
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/components/ui/tooltip';
@@ -12,9 +12,12 @@ interface TextEditorProps {
     onSave?: (content: string) => void;
     onClear?: () => void;
     fileName?: string;
+    onFileNameChange?: (fileName: string) => void;
     wordCount?: boolean;
     readingTime?: boolean;
     fullscreenControl?: boolean;
+    isViewMode?: boolean;  // Add this prop for view-only mode
+    onBack?: () => void;   // Add this prop for navigation back to list
 }
 
 export function TextEditor(
@@ -23,9 +26,12 @@ export function TextEditor(
         onSave,
         onClear,
         fileName: initialFileName = 'Untitled',
+        onFileNameChange,
         wordCount = true,
         readingTime = true,
         fullscreenControl = true,
+        isViewMode = false,  // Default to edit mode
+        onBack,
     }: TextEditorProps) {
     const [content, setContent] = useState(initialContent);
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -41,13 +47,18 @@ export function TextEditor(
         setIsDirty(false);
     }, [initialContent]);
 
+    useEffect(() => {
+        setFileName(initialFileName);
+    }, [initialFileName]);
+
     const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        if (isViewMode) return; // Don't allow changes in view mode
         setContent(e.target.value);
         setIsDirty(true);
     };
 
     const handleSave = () => {
-        if (onSave) {
+        if (onSave && !isViewMode) {
             onSave(content);
             setIsDirty(false);
             toast({
@@ -58,6 +69,7 @@ export function TextEditor(
     };
 
     const handleClear = () => {
+        if (isViewMode) return; // Don't allow clearing in view mode
         setContent('');
         setIsDirty(true);
         if (onClear) onClear();
@@ -110,13 +122,26 @@ export function TextEditor(
     };
 
     const handleFileNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFileName(e.target.value);
+        if (isViewMode) return; // Don't allow changing filename in view mode
+        const newFileName = e.target.value;
+        setFileName(newFileName);
+        if (onFileNameChange) {
+            onFileNameChange(newFileName);
+        }
     };
 
     const toggleFileNameInput = () => {
+        if (isViewMode) return; // Don't allow toggling filename input in view mode
         setShowFileNameInput(!showFileNameInput);
         if (!showFileNameInput && fileNameInputRef.current) {
             setTimeout(() => fileNameInputRef.current?.focus(), 0);
+        }
+    };
+
+    const handleFileNameBlur = () => {
+        setShowFileNameInput(false);
+        if (onFileNameChange && fileName !== initialFileName) {
+            onFileNameChange(fileName);
         }
     };
 
@@ -129,24 +154,39 @@ export function TextEditor(
             {/* Editor Header */}
             <div className="bg-muted p-4 border-b flex items-center justify-between">
                 <div className="flex items-center gap-2">
+                    {onBack && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={onBack}
+                            className="mr-2"
+                        >
+                            <ArrowLeft className="h-4 w-4" />
+                        </Button>
+                    )}
                     <FileText className="h-5 w-5 text-speekly-blue"/>
-                    {showFileNameInput ? (
+                    {showFileNameInput && !isViewMode ? (
                         <Input
                             ref={fileNameInputRef}
                             value={fileName}
                             onChange={handleFileNameChange}
-                            onBlur={() => setShowFileNameInput(false)}
-                            onKeyDown={(e) => e.key === 'Enter' && setShowFileNameInput(false)}
+                            onBlur={handleFileNameBlur}
+                            onKeyDown={(e) => e.key === 'Enter' && handleFileNameBlur()}
                             className="h-8 w-40"
                         />
                     ) : (
                         <h3
-                            className="font-medium cursor-pointer hover:underline"
-                            onClick={toggleFileNameInput}
+                            className={`font-medium ${!isViewMode ? 'cursor-pointer hover:underline' : ''}`}
+                            onClick={!isViewMode ? toggleFileNameInput : undefined}
                         >
                             {fileName || 'Untitled Script'}
-                            {isDirty && '*'}
+                            {isDirty && !isViewMode && '*'}
                         </h3>
+                    )}
+                    {isViewMode && (
+                        <Badge variant="outline" className="ml-2">
+                            View Mode
+                        </Badge>
                     )}
                 </div>
 
@@ -195,23 +235,26 @@ export function TextEditor(
                     value={content}
                     onChange={handleContentChange}
                     placeholder="Type your script here..."
-                    className="min-h-[300px] w-full resize-none text-base"
+                    className={`min-h-[300px] w-full resize-none text-base ${isViewMode ? 'bg-muted/20 cursor-text' : ''}`}
                     spellCheck="true"
+                    readOnly={isViewMode}
                 />
             </div>
 
             {/* Editor Footer */}
             <div className="bg-muted/30 p-4 border-t flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
-                    <Button
-                        size="sm"
-                        onClick={handleSave}
-                        disabled={!isDirty}
-                        className="speekly-gradient"
-                    >
-                        <Save className="mr-2 h-4 w-4"/>
-                        Save
-                    </Button>
+                    {!isViewMode && (
+                        <Button
+                            size="sm"
+                            onClick={handleSave}
+                            disabled={!isDirty}
+                            className="speekly-gradient"
+                        >
+                            <Save className="mr-2 h-4 w-4"/>
+                            Save
+                        </Button>
+                    )}
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -253,24 +296,26 @@ export function TextEditor(
                         </Tooltip>
                     </TooltipProvider>
 
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={handleClear}
-                                    disabled={!content}
-                                >
-                                    <Trash2 className="mr-2 h-4 w-4"/>
-                                    Clear
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Clear the editor</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
+                    {!isViewMode && (
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleClear}
+                                        disabled={!content}
+                                    >
+                                        <Trash2 className="mr-2 h-4 w-4"/>
+                                        Clear
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Clear the editor</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    )}
                 </div>
             </div>
         </div>

@@ -74,6 +74,7 @@ export function Navbar() {
               <NavItem to="/models" label="Models"/>
               <NavItem to="/transcription" label="Transcription"/>
               <NavItem to="/live" label="Live"/>
+              <NavItem to="/text-editor" label="Editor"/>
 
               <Link to="/webspeech" className="px-3 py-2 rounded-md text-sm font-medium hover:text-primary transition-colors">
                 Web Speech
