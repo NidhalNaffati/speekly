@@ -23,8 +23,8 @@ export interface Script {
     id: string;
     title: string;
     content: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt: Date | string;
+    updatedAt: Date | string;
     wordCount: number;
 }
 
@@ -34,6 +34,11 @@ interface ScriptTableProps {
     onDeleteScript: (scriptId: string) => void;
     onViewScript: (script: Script) => void;
 }
+
+// Helper function to ensure we're working with Date objects
+const ensureDate = (date: Date | string): Date => {
+    return date instanceof Date ? date : new Date(date);
+};
 
 export function ScriptTable({scripts, onEditScript, onDeleteScript, onViewScript}: ScriptTableProps) {
     const [searchTerm, setSearchTerm] = useState('');
@@ -61,8 +66,10 @@ export function ScriptTable({scripts, onEditScript, onDeleteScript, onViewScript
                     ? a.wordCount - b.wordCount
                     : b.wordCount - a.wordCount;
             } else {
-                const dateA = sortBy === 'createdAt' ? a.createdAt : a.updatedAt;
-                const dateB = sortBy === 'createdAt' ? b.createdAt : b.updatedAt;
+                // Convert to Date objects if they aren't already
+                const dateA = ensureDate(sortBy === 'createdAt' ? a.createdAt : a.updatedAt);
+                const dateB = ensureDate(sortBy === 'createdAt' ? b.createdAt : b.updatedAt);
+
                 return sortDirection === 'asc'
                     ? dateA.getTime() - dateB.getTime()
                     : dateB.getTime() - dateA.getTime();
@@ -123,8 +130,8 @@ export function ScriptTable({scripts, onEditScript, onDeleteScript, onViewScript
                                     <TableCell>
                                         <Badge variant="outline">{script.wordCount} words</Badge>
                                     </TableCell>
-                                    <TableCell>{format(script.createdAt, 'MMM d, yyyy')}</TableCell>
-                                    <TableCell>{format(script.updatedAt, 'MMM d, yyyy h:mm a')}</TableCell>
+                                    <TableCell>{format(ensureDate(script.createdAt), 'MMM d, yyyy')}</TableCell>
+                                    <TableCell>{format(ensureDate(script.updatedAt), 'MMM d, yyyy h:mm a')}</TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex justify-end space-x-2">
                                             <Button
