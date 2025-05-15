@@ -1,8 +1,8 @@
-import {useEffect, useState, useRef} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {TextEditor} from "@/components/TextEditor";
-import {ScriptTable, Script} from '@/components/ScriptTable';
+import {Script, ScriptTable} from '@/components/ScriptTable';
 import {useToast} from '@/hooks/use-toast';
-import {PlusCircle, AlertCircle} from 'lucide-react';
+import {AlertCircle, PlusCircle} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {v4 as uuidv4} from 'uuid';
 import {
@@ -16,6 +16,7 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import {IpcRenderer} from "electron";
+import {ScriptDetails} from "@/components/ScriptDetails.tsx";
 
 const ipcRenderer: IpcRenderer = window.ipcRenderer;
 
@@ -101,7 +102,7 @@ function TextEditorPage() {
         }
 
         // Create interval for backing up
-        const interval = setInterval(() => {
+        return setInterval(() => {
             console.log('Creating automatic backup...');
             backupScriptsToFile(scriptsData)
                 .then(result => {
@@ -113,8 +114,6 @@ function TextEditorPage() {
                 })
                 .catch(err => console.error('Auto backup error:', err));
         }, intervalMinutes * 60 * 1000);
-
-        return interval;
     };
 
     // Load scripts on component mount
@@ -350,7 +349,14 @@ function TextEditorPage() {
                     </Button>
                 </div>
             ) : showEditor ? (
-                <div>
+                <div className="space-y-4">
+                    {/* Add the ScriptDetails component here */}
+                    {currentScript && (
+                        <ScriptDetails
+                            script={currentScript}
+                            isEditing={!isViewMode}
+                        />
+                    )}
                     <TextEditor
                         initialContent={currentScript?.content || ''}
                         onSave={handleSave}
