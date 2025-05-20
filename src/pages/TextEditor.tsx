@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import {TextEditor} from "@/components/TextEditor";
 import {Script, ScriptTable} from '@/components/ScriptTable';
 import {useToast} from '@/hooks/use-toast';
@@ -96,7 +96,7 @@ function TextEditorPage() {
         }
     };
 
-    const setupAutoBackup = (scriptsData: Script[], intervalMinutes: number) => {
+    const setupAutoBackup = useCallback((scriptsData: Script[], intervalMinutes: number) => {
         if (backupIntervalRef.current) {
             clearInterval(backupIntervalRef.current);
         }
@@ -114,7 +114,7 @@ function TextEditorPage() {
                 })
                 .catch(err => console.error('Auto backup error:', err));
         }, intervalMinutes * 60 * 1000);
-    };
+    }, []);
 
     // Load scripts on component mount
     useEffect(() => {
