@@ -1,6 +1,6 @@
 import {app, BrowserWindow} from "electron";
 import path from "node:path";
-import {registerAllHandlers} from "./ipc/manager.ts";
+import {registerIPCHandlers} from "./ipc/manager.ts";
 
 process.env.DIST = path.join(__dirname, "../dist");
 process.env.VITE_PUBLIC = app.isPackaged
@@ -34,7 +34,7 @@ export function createWindow(): BrowserWindow {
         window.loadFile(path.join(process.env.DIST, "index.html"));
     }
 
-    registerAllHandlers(window);
+    registerIPCHandlers(window);
 
 
     return window;
