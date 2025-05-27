@@ -1,4 +1,4 @@
-import {BrowserRouter, Route, Routes} from "react-router-dom";
+import {Routes, Route} from 'react-router-dom';
 import Home from "../pages/Home.tsx";
 import Settings from "../pages/Settings.tsx";
 import Transcription from "../pages/Transcription.tsx";
@@ -12,19 +12,17 @@ import TextEditorPage from "@/pages/TextEditor.tsx";
 function AppRoutes() {
     return (
         <>
-            <BrowserRouter>
-                <Routes>
-                    <Route path="/" element={<Index/>}/>
-                    <Route path="/home" element={<Home/>}/>
-                    <Route path="/settings" element={<Settings/>}/>
-                    <Route path="/webspeech" element={<WebSpeech/>}/>
-                    <Route path="/transcription" element={<Transcription/>}/>
-                    <Route path="/models" element={<Models/>}/>
-                    <Route path="/live" element={<Live/>}/>
-                    <Route path="/text-editor" element={<TextEditorPage/>}/>
-                    <Route path="*" element={<NotFound/>}/>
-                </Routes>
-            </BrowserRouter>
+            <Routes>
+                <Route path="/" element={<Index/>}/>
+                <Route path="/home" element={<Home/>}/>
+                <Route path="/settings" element={<Settings/>}/>
+                <Route path="/webspeech" element={<WebSpeech/>}/>
+                <Route path="/transcription" element={<Transcription/>}/>
+                <Route path="/models" element={<Models/>}/>
+                <Route path="/live" element={<Live/>}/>
+                <Route path="/text-editor" element={<TextEditorPage/>}/>
+                <Route path="*" element={<NotFound/>}/>
+            </Routes>
         </>
     );
 }

@@ -1,6 +1,8 @@
 import {Toaster} from "@/components/ui/toaster";
 import {Toaster as Sonner} from "@/components/ui/sonner";
 import {TooltipProvider} from "@/components/ui/tooltip";
+import {Navbar} from "@/components/Navbar";
+import {BrowserRouter} from "react-router-dom";
 
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {ThemeProvider} from "./components/ThemeProvider";
@@ -12,9 +14,14 @@ const App = () => (
     <ThemeProvider defaultTheme="dark">
         <QueryClientProvider client={queryClient}>
             <TooltipProvider>
-                <Toaster/>
-                <Sonner/>
-                <AppRoutes/>
+                <BrowserRouter>
+                    <Toaster/>
+                    <Sonner/>
+                    <Navbar/>
+                    <main className="pt-16">
+                        <AppRoutes/>
+                    </main>
+                </BrowserRouter>
             </TooltipProvider>
         </QueryClientProvider>
     </ThemeProvider>
