@@ -1,8 +1,9 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {TextEditor} from "@/components/TextEditor";
 import {Script, ScriptTable} from '@/components/ScriptTable';
+import {DragDropUpload} from '@/components/DragDropUpload'; // Import the component
 import {useToast} from '@/hooks/use-toast';
-import {AlertCircle, PlusCircle} from 'lucide-react';
+import {AlertCircle, PlusCircle, Upload} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {v4 as uuidv4} from 'uuid';
 import {
@@ -43,6 +44,7 @@ function TextEditorPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
     const [isViewMode, setIsViewMode] = useState(false);
+    const [showUpload, setShowUpload] = useState(false); // New state for upload visibility
     const backupIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const {toast} = useToast();
 
@@ -329,6 +331,16 @@ function TextEditorPage() {
         setCurrentScript(null);
     };
 
+    // New handler for uploaded scripts
+    const handleScriptsUploaded = useCallback((uploadedScripts: Script[]) => {
+        setScripts(prevScripts => [...prevScripts, ...uploadedScripts]);
+        setShowUpload(false); // Hide upload component after successful upload
+    }, []);
+
+    const toggleUpload = () => {
+        setShowUpload(!showUpload);
+    };
+
     return (
         <div className="container mx-auto p-4 space-y-6">
             {isLoading ? (
@@ -373,21 +385,49 @@ function TextEditorPage() {
                 <>
                     <div className="flex items-center justify-between mb-4">
                         <h1 className="text-2xl font-bold">My Scripts</h1>
-                        <Button onClick={handleCreateNewScript} className="speekly-gradient">
-                            <PlusCircle className="mr-2 h-4 w-4"/>
-                            Create New Script
-                        </Button>
+                        <div className="flex gap-2">
+                            <Button
+                                onClick={toggleUpload}
+                                variant="outline"
+                                className={showUpload ? "bg-primary text-primary-foreground" : ""}
+                            >
+                                <Upload className="mr-2 h-4 w-4"/>
+                                {showUpload ? 'Hide Upload' : 'Upload Scripts'}
+                            </Button>
+                            <Button onClick={handleCreateNewScript} className="speekly-gradient">
+                                <PlusCircle className="mr-2 h-4 w-4"/>
+                                Create New Script
+                            </Button>
+                        </div>
                     </div>
+
+                    {/* Upload component - conditionally rendered */}
+                    {showUpload && (
+                        <DragDropUpload
+                            onScriptsUploaded={handleScriptsUploaded}
+                            className="mb-6"
+                        />
+                    )}
+
                     {scripts.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-64 text-center">
                             <p className="text-lg text-muted-foreground">You don't have any scripts yet.</p>
-                            <Button
-                                onClick={handleCreateNewScript}
-                                className="mt-4 speekly-gradient"
-                            >
-                                <PlusCircle className="mr-2 h-4 w-4"/>
-                                Create Your First Script
-                            </Button>
+                            <div className="flex gap-2 mt-4">
+                                <Button
+                                    onClick={handleCreateNewScript}
+                                    className="speekly-gradient"
+                                >
+                                    <PlusCircle className="mr-2 h-4 w-4"/>
+                                    Create Your First Script
+                                </Button>
+                                <Button
+                                    onClick={toggleUpload}
+                                    variant="outline"
+                                >
+                                    <Upload className="mr-2 h-4 w-4"/>
+                                    Upload Scripts
+                                </Button>
+                            </div>
                         </div>
                     ) : (
                         <ScriptTable
