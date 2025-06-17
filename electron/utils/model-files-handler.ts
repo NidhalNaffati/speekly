@@ -168,6 +168,7 @@ export function deleteModel(modelName: string): void {
 }
 
 export function listAvailableModels(): string[] {
+// TODO: verify that model is a valid one before show it
   try {
     if (!fs.existsSync(MODELS_DIR_PATH)) {
       return [];
