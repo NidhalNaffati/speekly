@@ -1,5 +1,4 @@
 import {Routes, Route} from 'react-router-dom';
-import Home from "../pages/Home.tsx";
 import Settings from "../pages/Settings.tsx";
 import Transcription from "../pages/Transcription.tsx";
 import Models from "../pages/Models.tsx";
@@ -14,7 +13,6 @@ function AppRoutes() {
         <>
             <Routes>
                 <Route path="/" element={<Index/>}/>
-                <Route path="/home" element={<Home/>}/>
                 <Route path="/settings" element={<Settings/>}/>
                 <Route path="/webspeech" element={<WebSpeech/>}/>
                 <Route path="/transcription" element={<Transcription/>}/>
