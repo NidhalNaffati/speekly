@@ -14,7 +14,7 @@ export function createWindow(): BrowserWindow {
     window = new BrowserWindow({
         width: 1200,
         height: 900,
-        alwaysOnTop: true,
+        alwaysOnTop: false,
         title: "speakly",
         autoHideMenuBar: true,
         icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
