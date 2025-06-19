@@ -15,7 +15,7 @@ export function createWindow(): BrowserWindow {
         width: 1200,
         height: 900,
         alwaysOnTop: true,
-        title: "smart-teleprompter",
+        title: "speakly",
         autoHideMenuBar: true,
         icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
         webPreferences: {
