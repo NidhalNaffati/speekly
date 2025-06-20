@@ -56,20 +56,6 @@ export function Navbar() {
           {/* Navigation - Desktop */}
           <div className="hidden md:block">
             <div className="flex items-center space-x-4">
-              <a href="#features"
-                 className="px-3 py-2 rounded-md text-sm font-medium hover:text-primary transition-colors">
-                Features
-              </a>
-              <a href="#demo"
-                 className="px-3 py-2 rounded-md text-sm font-medium hover:text-primary transition-colors">
-                Demo
-              </a>
-              <a href="#download"
-                 className="px-3 py-2 rounded-md text-sm font-medium hover:text-primary transition-colors">
-                Download
-              </a>
-
-              {/* New NavItems */}
               <NavItem to="/settings" label="Settings"/>
               <NavItem to="/models" label="Models"/>
               <NavItem to="/transcription" label="Transcription"/>
@@ -110,29 +96,6 @@ export function Navbar() {
       {mobileMenuOpen && (
         <div className="md:hidden bg-background/95 backdrop-blur-md">
           <div className="px-2 pt-2 pb-3 space-y-1">
-            <a
-              href="#features"
-              className="block px-3 py-2 rounded-md text-base font-medium hover:text-primary"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Features
-            </a>
-            <a
-              href="#demo"
-              className="block px-3 py-2 rounded-md text-base font-medium hover:text-primary"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Demo
-            </a>
-            <a
-              href="#download"
-              className="block px-3 py-2 rounded-md text-base font-medium hover:text-primary"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Download
-            </a>
-
-            {/* New NavItems for mobile */}
             <NavItem
               to="/settings"
               label="Settings"
