@@ -1,4 +1,4 @@
-import {useState, useEffect, useRef} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import useTextAnalyzerHooks from "../hooks/useVoskHooks";
 import VoskControl from "../components/transcription/VoskControl";
 import {Mic, Copy, CheckCircle2} from "lucide-react";
@@ -23,7 +23,8 @@ const LiveSpeak: React.FC = () => {
     const handleCopyText = () => {
         if (!recognizedText) return;
 
-        navigator.clipboard.writeText(recognizedText)
+        navigator.clipboard
+            .writeText(recognizedText)
             .then(() => {
                 setCopied(true);
                 toast({
@@ -44,31 +45,31 @@ const LiveSpeak: React.FC = () => {
     // Format recognized text with paragraph breaks
     const formattedText = recognizedText
         .split(/(?<=[.!?])\s+/)
-        .filter(sentence => sentence.trim().length > 0)
+        .filter((sentence) => sentence.trim().length > 0)
         .map((sentence, index) => (
-            <p key={index} className="mb-2 leading-relaxed">
+            <p key={index} className="mb-2 leading-relaxed text-base sm:text-lg">
                 {sentence}
             </p>
         ));
 
     return (
-        <div className="container mx-auto min-h-screen p-4 max-w-3xl">
-            <Card className="mb-6 border-none shadow-lg">
+        <div className="flex flex-col h-screen w-full p-4 sm:p-6 lg:p-8">
+            <Card className="flex flex-col flex-grow border-none shadow-lg">
                 <CardHeader className="bg-primary/5 rounded-t-lg">
-                    <CardTitle className="flex items-center justify-between">
+                    <CardTitle className="flex items-center justify-between text-lg sm:text-xl">
                         <div className="flex items-center gap-2">
                             <Mic className="h-5 w-5"/>
                             <span>Live Transcription</span>
                         </div>
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-6">
+                <CardContent className="flex flex-col flex-grow pt-6">
                     <div className="flex justify-center mb-6">
                         <VoskControl/>
                     </div>
 
-                    <div className="text-sm text-muted-foreground mb-2 flex justify-between items-center">
-                        <span>Transcription</span>
+                    <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm sm:text-base text-muted-foreground">Transcription</span>
                         {recognizedText && (
                             <Button
                                 variant="ghost"
@@ -76,19 +77,22 @@ const LiveSpeak: React.FC = () => {
                                 className="h-8 px-2"
                                 onClick={handleCopyText}
                             >
-                                {copied ? <CheckCircle2 className="h-4 w-4 text-green-500"/> :
-                                    <Copy className="h-4 w-4"/>}
+                                {copied ? (
+                                    <CheckCircle2 className="h-4 w-4 text-green-500"/>
+                                ) : (
+                                    <Copy className="h-4 w-4"/>
+                                )}
                             </Button>
                         )}
                     </div>
 
-                    <Card className="border border-muted bg-muted/5">
-                        <ScrollArea className="h-80 w-full rounded-md p-4" ref={scrollRef}>
+                    <Card className="flex-grow border border-muted bg-muted/5">
+                        <ScrollArea className="h-full w-full rounded-md p-4" ref={scrollRef}>
                             <div className="whitespace-pre-wrap">
                                 {formattedText.length > 0 ? (
                                     formattedText
                                 ) : (
-                                    <p className="text-muted-foreground text-center py-8">
+                                    <p className="text-muted-foreground text-center py-8 text-sm sm:text-base">
                                         Speak to see your words appear here...
                                     </p>
                                 )}
